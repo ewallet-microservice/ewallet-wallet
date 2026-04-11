@@ -25,7 +25,7 @@ func (r *WalletRepository) CreateWallet(ctx context.Context, wallet *models.Wall
 	return nil
 }
 
-func (r *WalletRepository) GetBalance(ctx context.Context, userID int) (models.Wallet, error) {
+func (r *WalletRepository) GetWalletByUserID(ctx context.Context, userID int) (models.Wallet, error) {
 	var wallet models.Wallet
 	err := r.db.Where("user_id = ?", userID).First(&wallet).Error
 	if err != nil {

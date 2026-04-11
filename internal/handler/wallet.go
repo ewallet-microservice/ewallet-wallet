@@ -12,7 +12,7 @@ import (
 
 type WalletService interface {
 	CreateWallet(ctx context.Context, wallet *models.Wallet) error
-	GetBalance(ctx context.Context, userID int) (models.Wallet, error)
+	GetBalance(ctx context.Context, userID int) (models.BalanceResponse, error)
 }
 
 type WalletHandler struct {
@@ -26,7 +26,7 @@ func NewWalletHandler(svc WalletService) *WalletHandler {
 func (w *WalletHandler) RegisterRoute(r *gin.Engine) {
 	walletV1 := r.Group("/wallets/v1")
 	walletV1.POST("/", w.createWallet)
-	walletV1.GET("/", w.getBalance)
+	walletV1.GET("/balance", w.getBalance)
 }
 
 func (w *WalletHandler) createWallet(c *gin.Context) {
