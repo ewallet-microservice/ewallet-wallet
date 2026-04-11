@@ -7,7 +7,7 @@ import (
 )
 
 type Wallet struct {
-	ID        int       `json:"-" gorm:"primarykey"`
+	ID        int       `json:"id" gorm:"primarykey"`
 	UserID    int       `json:"user_id" gorm:"column:user_id;unique"`
 	Balance   float64   `json:"balance" gorm:"column:balance;type:decimal(15,2)" validate:"gte=0"`
 	CreatedAt time.Time `json:"-"`

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/mhasnanr/ewallet-wallet/internal/models"
 	"gorm.io/gorm"
@@ -22,4 +23,18 @@ func (r *WalletRepository) CreateWallet(ctx context.Context, wallet *models.Wall
 	}
 
 	return nil
+}
+
+func (r *WalletRepository) GetBalance(ctx context.Context, userID int) (models.Wallet, error) {
+	var wallet models.Wallet
+	err := r.db.Where("user_id = ?", userID).First(&wallet).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return wallet, errors.New("user not found")
+		}
+
+		return wallet, err
+	}
+
+	return wallet, nil
 }

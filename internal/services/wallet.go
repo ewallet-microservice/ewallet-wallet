@@ -8,6 +8,7 @@ import (
 
 type WalletRepository interface {
 	CreateWallet(ctx context.Context, wallet *models.Wallet) error
+	GetBalance(ctx context.Context, userID int) (models.Wallet, error)
 }
 
 type WalletService struct {
@@ -20,4 +21,8 @@ func NeWalletService(repo WalletRepository) *WalletService {
 
 func (s *WalletService) CreateWallet(ctx context.Context, wallet *models.Wallet) error {
 	return s.repo.CreateWallet(ctx, wallet)
+}
+
+func (s *WalletService) GetBalance(ctx context.Context, userID int) (models.Wallet, error) {
+	return s.repo.GetBalance(ctx, userID)
 }

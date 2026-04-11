@@ -12,6 +12,7 @@ import (
 
 type WalletService interface {
 	CreateWallet(ctx context.Context, wallet *models.Wallet) error
+	GetBalance(ctx context.Context, userID int) (models.Wallet, error)
 }
 
 type WalletHandler struct {
@@ -25,7 +26,7 @@ func NewWalletHandler(svc WalletService) *WalletHandler {
 func (w *WalletHandler) RegisterRoute(r *gin.Engine) {
 	walletV1 := r.Group("/wallets/v1")
 	walletV1.POST("/", w.createWallet)
-
+	walletV1.GET("/", w.getBalance)
 }
 
 func (w *WalletHandler) createWallet(c *gin.Context) {
@@ -56,4 +57,21 @@ func (w *WalletHandler) createWallet(c *gin.Context) {
 	}
 
 	helpers.SendResponseHTTP(c, http.StatusCreated, "wallet created", req)
+}
+
+func (w *WalletHandler) getBalance(c *gin.Context) {
+	userID := c.GetInt("userID")
+
+	if userID == 0 {
+		helpers.SendResponseHTTP(c, http.StatusBadRequest, "user id is empty", nil)
+		return
+	}
+
+	wallet, err := w.svc.GetBalance(c.Request.Context(), userID)
+	if err != nil {
+		helpers.SendResponseHTTP(c, http.StatusBadRequest, "invalid body", nil)
+		return
+	}
+
+	helpers.SendResponseHTTP(c, http.StatusOK, "success", wallet)
 }
