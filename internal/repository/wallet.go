@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/mhasnanr/ewallet-wallet/constants"
 	"github.com/mhasnanr/ewallet-wallet/internal/models"
 	"gorm.io/gorm"
 )
@@ -30,7 +31,7 @@ func (r *WalletRepository) GetWalletByUserID(ctx context.Context, userID int) (m
 	err := r.db.Where("user_id = ?", userID).First(&wallet).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return wallet, errors.New("user not found")
+			return wallet, constants.ErrorUserNotFound
 		}
 
 		return wallet, err
