@@ -14,69 +14,80 @@ import (
 
 type WalletService interface {
 	CreateWallet(ctx context.Context, wallet *models.Wallet) error
-	GetBalance(ctx context.Context, userID int) (models.BalanceResponse, error)
+	GetBalance(ctx context.Context, accessToken string) (models.BalanceResponse, error)
+}
+
+type AuthMiddleware interface {
+	MiddlewareAccessToken(c *gin.Context)
 }
 
 type WalletHandler struct {
-	svc WalletService
+	svc            WalletService
+	authMiddleware AuthMiddleware
 }
 
-func NewWalletHandler(svc WalletService) *WalletHandler {
-	return &WalletHandler{svc}
+func NewWalletHandler(svc WalletService, authMiddleware AuthMiddleware) *WalletHandler {
+	return &WalletHandler{svc, authMiddleware}
 }
 
-func (w *WalletHandler) RegisterRoute(r *gin.Engine) {
+func (h *WalletHandler) RegisterRoute(r *gin.Engine) {
 	walletV1 := r.Group("/wallets/v1")
-	walletV1.POST("/", w.createWallet)
-	walletV1.GET("/balance", w.getBalance)
+	walletV1.POST("/", h.createWallet)
+	walletV1.GET("/balance", h.authMiddleware.MiddlewareAccessToken, h.getBalance)
 }
 
-func (w *WalletHandler) createWallet(c *gin.Context) {
+func (h *WalletHandler) createWallet(c *gin.Context) {
 	var req models.Wallet
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		w.writeErrorResponse(c, constants.ErrorBadRequest, nil)
+		h.writeErrorResponse(c, constants.ErrorBadRequest, nil)
 		return
 	}
 
 	if req.UserID == 0 {
-		w.writeErrorResponse(c, constants.ErrorUserIDRequired, nil)
+		h.writeErrorResponse(c, constants.ErrorUserIDRequired, nil)
 		return
 	}
 
 	if err = req.Validate(); err != nil {
-		w.writeErrorResponse(c, err, nil)
+		h.writeErrorResponse(c, err, nil)
 		return
 	}
 
-	err = w.svc.CreateWallet(c.Request.Context(), &req)
+	err = h.svc.CreateWallet(c.Request.Context(), &req)
 	if err != nil {
-		w.writeErrorResponse(c, constants.ErrorFailedToCreateWallet, nil)
+		h.writeErrorResponse(c, constants.ErrorFailedToCreateWallet, nil)
 		return
 	}
 
 	helpers.SendResponseHTTP(c, http.StatusCreated, constants.WalletCreated, req)
 }
 
-func (w *WalletHandler) getBalance(c *gin.Context) {
-	userID := c.GetInt("userID")
+func (h *WalletHandler) getBalance(c *gin.Context) {
+	token, ok := c.Get("accessToken")
 
-	if userID == 0 {
-		w.writeErrorResponse(c, constants.ErrorUserIDRequired, nil)
+	if !ok {
+		h.writeErrorResponse(c, constants.ErrorFailedToGetToken, nil)
 		return
 	}
 
-	wallet, err := w.svc.GetBalance(c.Request.Context(), userID)
+	accessToken, ok := token.(string)
+	if !ok {
+		h.writeErrorResponse(c, constants.ErrorFailedToParseToken, nil)
+		return
+	}
+
+	wallet, err := h.svc.GetBalance(c.Request.Context(), accessToken)
 	if err != nil {
-		w.writeErrorResponse(c, constants.ErrorFailedToGetBalance, nil)
+		h.writeErrorResponse(c, constants.ErrorFailedToGetBalance, nil)
 		return
 	}
 
 	helpers.SendResponseHTTP(c, http.StatusOK, constants.GetBalance, wallet)
 }
 
-func (w *WalletHandler) writeErrorResponse(c *gin.Context, err error, data any) {
+func (h *WalletHandler) writeErrorResponse(c *gin.Context, err error, data any) {
 	var appErr *constants.AppError
 	var valErrs validator.ValidationErrors
 

@@ -6,7 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mhasnanr/ewallet-wallet/bootstrap"
+	"github.com/mhasnanr/ewallet-wallet/external"
 	"github.com/mhasnanr/ewallet-wallet/internal/handler"
+	"github.com/mhasnanr/ewallet-wallet/internal/middleware"
 	"github.com/mhasnanr/ewallet-wallet/internal/repository"
 	"github.com/mhasnanr/ewallet-wallet/internal/services"
 	"gorm.io/gorm"
@@ -19,9 +21,12 @@ func ServeHTTP(db *gorm.DB) {
 		c.JSON(200, gin.H{"message": "server is healthy"})
 	})
 
+	userAPIExternal := &external.ExternalUserAPI{}
+	authMiddleware := middleware.NewAuthMiddleware()
+
 	walletRepository := repository.NewWalletRepository(db)
-	walletService := services.NeWalletService(walletRepository)
-	walletHandler := handler.NewWalletHandler(walletService)
+	walletService := services.NeWalletService(walletRepository, userAPIExternal)
+	walletHandler := handler.NewWalletHandler(walletService, authMiddleware)
 
 	walletHandler.RegisterRoute(r)
 
