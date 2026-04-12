@@ -30,7 +30,7 @@ func ServeHTTP(db *gorm.DB) {
 
 	walletHandler.RegisterRoute(r)
 
-	server := &http.Server{Addr: ":" + bootstrap.GetEnv("HTTP_PORT", "8080"), Handler: r}
+	server := &http.Server{Addr: ":" + bootstrap.GetEnv("HTTP_PORT", "8081"), Handler: r}
 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal("server stopped")

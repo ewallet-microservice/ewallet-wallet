@@ -10,7 +10,7 @@ import (
 )
 
 func ServeGRPC() {
-	listener, err := net.Listen("tcp", ":"+bootstrap.GetEnv("GRPC_PORT", "7000"))
+	listener, err := net.Listen("tcp", ":"+bootstrap.GetEnv("GRPC_PORT", "7001"))
 	if err != nil {
 		log.Fatal("failed to listen grpc port: ", err)
 	}
