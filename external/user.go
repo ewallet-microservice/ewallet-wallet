@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/mhasnanr/ewallet-wallet/bootstrap"
 	"github.com/mhasnanr/ewallet-wallet/constants"
 )
 
@@ -30,7 +31,7 @@ func (e *ExternalUserAPI) ValidateToken(accessToken string) (ValidateUserRespons
 		client = &http.Client{}
 	)
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/users/v1/token/validate", nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/users/v1/token/validate", bootstrap.GetEnv("USER_API_BASE_URL", "")), nil)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
 	resp, err := client.Do(req)
 
