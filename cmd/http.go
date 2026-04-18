@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -21,17 +22,20 @@ func ServeHTTP(db *gorm.DB) {
 		c.JSON(200, gin.H{"message": "server is healthy"})
 	})
 
-	userAPIExternal := &external.ExternalUserAPI{}
+	// userAPIExternal := &external.ExternalUserAPI{}
+	userServiceGRPC := &external.UserGRPC{}
 	authMiddleware := middleware.NewAuthMiddleware()
 
 	walletRepository := repository.NewWalletRepository(db)
-	walletService := services.NeWalletService(walletRepository, userAPIExternal)
+	walletService := services.NeWalletService(walletRepository, userServiceGRPC)
 	walletHandler := handler.NewWalletHandler(walletService, authMiddleware)
 
 	walletHandler.RegisterRoute(r)
 
-	server := &http.Server{Addr: ":" + bootstrap.GetEnv("HTTP_PORT", "8081"), Handler: r}
+	httpPort := bootstrap.GetEnv("HTTP_PORT", "8081")
+	server := &http.Server{Addr: ":" + httpPort, Handler: r}
 
+	fmt.Printf("http server is running on port %s...\n", httpPort)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal("server stopped")
 	}

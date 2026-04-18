@@ -2,7 +2,9 @@ package services
 
 import (
 	"context"
+	"errors"
 
+	pb "github.com/mhasnanr/ewallet-wallet/cmd/tokenvalidation"
 	"github.com/mhasnanr/ewallet-wallet/external"
 	"github.com/mhasnanr/ewallet-wallet/internal/models"
 )
@@ -16,13 +18,18 @@ type UserAPI interface {
 	ValidateToken(string) (external.ValidateUserResponse, error)
 }
 
-type WalletService struct {
-	repo    WalletRepository
-	userAPI UserAPI
+type UserServiceGRPC interface {
+	ValidateToken(ctx context.Context, accessToken string) (*pb.TokenResponse, error)
 }
 
-func NeWalletService(repo WalletRepository, userAPI UserAPI) *WalletService {
-	return &WalletService{repo, userAPI}
+type WalletService struct {
+	repo WalletRepository
+	// userAPI UserAPI
+	userSvcGRPC UserServiceGRPC
+}
+
+func NeWalletService(repo WalletRepository, userSvc UserServiceGRPC) *WalletService {
+	return &WalletService{repo, userSvc}
 }
 
 func (s *WalletService) CreateWallet(ctx context.Context, wallet *models.Wallet) error {
@@ -32,12 +39,17 @@ func (s *WalletService) CreateWallet(ctx context.Context, wallet *models.Wallet)
 func (s *WalletService) GetBalance(ctx context.Context, accessToken string) (models.BalanceResponse, error) {
 	var response models.BalanceResponse
 
-	user, err := s.userAPI.ValidateToken(accessToken)
+	user, err := s.userSvcGRPC.ValidateToken(ctx, accessToken)
 	if err != nil {
 		return response, err
 	}
 
-	wallet, err := s.repo.GetWalletByUserID(ctx, user.UserID)
+	userData := user.GetData()
+	if userData == nil {
+		return response, errors.New("user data not found in response")
+	}
+
+	wallet, err := s.repo.GetWalletByUserID(ctx, int(userData.GetUserId()))
 	if err != nil {
 		return response, err
 	}
