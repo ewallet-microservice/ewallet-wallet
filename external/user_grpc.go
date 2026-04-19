@@ -10,26 +10,31 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type UserGRPC struct{}
+type UserGRPC struct {
+	client pb.TokenValidationClient
+}
 
-func (e *UserGRPC) ValidateToken(ctx context.Context, accessToken string) (*pb.TokenResponse, error) {
-	var (
-		serverAddr = bootstrap.GetEnv("USER_GRPC_URL", "")
-	)
+func NewUserGRPC() (*UserGRPC, *grpc.ClientConn, error) {
+	serverAddr := bootstrap.GetEnv("USER_GRPC_URL", "")
 
 	conn, err := grpc.NewClient(serverAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, errors.New("failed to dial ums grpc")
+		return nil, nil, errors.New("failed to dial ums grpc")
 	}
 
-	defer conn.Close()
-
 	client := pb.NewTokenValidationClient(conn)
+
+	return &UserGRPC{
+		client: client,
+	}, conn, nil
+}
+
+func (e *UserGRPC) ValidateToken(ctx context.Context, accessToken string) (*pb.TokenResponse, error) {
 	req := &pb.TokenRequest{
 		Token: accessToken,
 	}
 
-	response, err := client.ValidateToken(ctx, req)
+	response, err := e.client.ValidateToken(ctx, req)
 	if err != nil {
 		return nil, errors.New("failed to validate token")
 	}

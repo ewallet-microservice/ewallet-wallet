@@ -22,12 +22,16 @@ func ServeHTTP(db *gorm.DB) {
 		c.JSON(200, gin.H{"message": "server is healthy"})
 	})
 
-	// userAPIExternal := &external.ExternalUserAPI{}
-	userServiceGRPC := &external.UserGRPC{}
-	authMiddleware := middleware.NewAuthMiddleware()
+	userGRPCClient, grpcConn, err := external.NewUserGRPC()
+	if err != nil {
+		log.Fatalf("failed to initialized gRPC: %v", err)
+	}
 
+	defer grpcConn.Close()
+
+	authMiddleware := middleware.NewAuthMiddleware()
 	walletRepository := repository.NewWalletRepository(db)
-	walletService := services.NeWalletService(walletRepository, userServiceGRPC)
+	walletService := services.NeWalletService(walletRepository, userGRPCClient)
 	walletHandler := handler.NewWalletHandler(walletService, authMiddleware)
 
 	walletHandler.RegisterRoute(r)
