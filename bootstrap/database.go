@@ -20,6 +20,6 @@ func SetupDatabase() {
 
 	Log.Infow("connected to database...")
 
-	database.AutoMigrate(&models.Wallet{})
+	database.AutoMigrate(&models.Wallet{}, &models.WalletTransaction{})
 	DB = database
 }
