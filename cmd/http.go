@@ -29,9 +29,9 @@ func ServeHTTP(db *gorm.DB) {
 
 	defer grpcConn.Close()
 
-	authMiddleware := middleware.NewAuthMiddleware()
+	authMiddleware := middleware.NewAuthMiddleware(userGRPCClient)
 	walletRepository := repository.NewWalletRepository(db)
-	walletService := services.NeWalletService(walletRepository, userGRPCClient)
+	walletService := services.NeWalletService(walletRepository)
 	walletHandler := handler.NewWalletHandler(walletService, authMiddleware)
 
 	walletHandler.RegisterRoute(r)
