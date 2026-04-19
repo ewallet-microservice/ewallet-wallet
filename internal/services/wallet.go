@@ -103,3 +103,54 @@ func (s *WalletService) CreditBalance(ctx context.Context, userID int, req model
 
 	return response, nil
 }
+
+func (s *WalletService) DebitBalance(ctx context.Context, userID int, req models.TransactionRequest) (models.BalanceResponse, error) {
+	var response models.BalanceResponse
+
+	history, err := s.repo.GetWalletTransactionByReference(ctx, req.Reference)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return response, constants.ErrorFailedToGetWalletTransaction
+		}
+	}
+
+	if history.ID > 0 {
+		return response, constants.ErrorDuplicateReference
+	}
+
+	var wallet models.Wallet
+
+	err = s.txManager.WithinTransaction(ctx, func(ctx context.Context) error {
+		wallet, err = s.repo.GetWalletForLock(ctx, userID)
+		if err != nil {
+			return err
+		}
+
+		wallet, err = s.repo.UpdateBalance(ctx, userID, -req.Amount)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return response, constants.ErrorFailedToUpdateBalance
+	}
+
+	walletTransaction := &models.WalletTransaction{
+		WalletID:        wallet.ID,
+		Amount:          req.Amount,
+		Reference:       req.Reference,
+		TransactionType: constants.DebitTransaction,
+	}
+
+	err = s.repo.CreateWalletTransaction(ctx, walletTransaction)
+	if err != nil {
+		return response, constants.ErrorFailedToInsertTransaction
+	}
+
+	response.Balance = wallet.Balance + req.Amount
+
+	return response, nil
+}

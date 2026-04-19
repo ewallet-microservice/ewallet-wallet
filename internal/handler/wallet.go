@@ -16,6 +16,7 @@ type WalletService interface {
 	CreateWallet(ctx context.Context, wallet *models.Wallet) error
 	GetBalance(ctx context.Context, userID int) (models.BalanceResponse, error)
 	CreditBalance(ctx context.Context, userID int, request models.TransactionRequest) (models.BalanceResponse, error)
+	DebitBalance(ctx context.Context, userID int, request models.TransactionRequest) (models.BalanceResponse, error)
 }
 
 type AuthMiddleware interface {
@@ -36,6 +37,7 @@ func (h *WalletHandler) RegisterRoute(r *gin.Engine) {
 	walletV1.POST("/", h.createWallet)
 	walletV1.GET("/balance", h.authMiddleware.MiddlewareAccessToken, h.getBalance)
 	walletV1.PUT("/balance/credit", h.authMiddleware.MiddlewareAccessToken, h.creditBalance)
+	walletV1.PUT("/balance/debit", h.authMiddleware.MiddlewareAccessToken, h.debitBalance)
 }
 
 func (h *WalletHandler) createWallet(c *gin.Context) {
@@ -123,6 +125,42 @@ func (h *WalletHandler) creditBalance(c *gin.Context) {
 	}
 
 	helpers.SendResponseHTTP(c, http.StatusCreated, constants.CreditBalance, resp)
+}
+
+func (h *WalletHandler) debitBalance(c *gin.Context) {
+	var req models.TransactionRequest
+
+	userData, ok := c.Get("tokenData")
+
+	if !ok {
+		h.writeErrorResponse(c, constants.ErrorFailedToGetUserData, nil)
+		return
+	}
+
+	data, ok := userData.(models.TokenData)
+	if !ok {
+		h.writeErrorResponse(c, constants.ErrorFailedToParseToken, nil)
+		return
+	}
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		h.writeErrorResponse(c, constants.ErrorBadRequest, nil)
+		return
+	}
+
+	if err = req.Validate(); err != nil {
+		h.writeErrorResponse(c, err, nil)
+		return
+	}
+
+	resp, err := h.svc.DebitBalance(c.Request.Context(), data.UserID, req)
+	if err != nil {
+		h.writeErrorResponse(c, err, nil)
+		return
+	}
+
+	helpers.SendResponseHTTP(c, http.StatusCreated, constants.DebitBalance, resp)
 }
 
 func (h *WalletHandler) writeErrorResponse(c *gin.Context, err error, data any) {
