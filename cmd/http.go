@@ -12,6 +12,7 @@ import (
 	"github.com/mhasnanr/ewallet-wallet/internal/middleware"
 	"github.com/mhasnanr/ewallet-wallet/internal/repository"
 	"github.com/mhasnanr/ewallet-wallet/internal/services"
+	"github.com/mhasnanr/ewallet-wallet/internal/transactor"
 	"gorm.io/gorm"
 )
 
@@ -30,8 +31,9 @@ func ServeHTTP(db *gorm.DB) {
 	defer grpcConn.Close()
 
 	authMiddleware := middleware.NewAuthMiddleware(userGRPCClient)
+	txManager := transactor.NewTransactor(db)
 	walletRepository := repository.NewWalletRepository(db)
-	walletService := services.NeWalletService(walletRepository)
+	walletService := services.NeWalletService(walletRepository, txManager)
 	walletHandler := handler.NewWalletHandler(walletService, authMiddleware)
 
 	walletHandler.RegisterRoute(r)

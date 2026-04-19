@@ -8,13 +8,20 @@ var (
 )
 
 var (
-	ErrUserIDRequired       = "user id is required"
-	ErrUserNotFound         = "user not found"
-	ErrFailedToGetBalance   = "failed to get balance"
-	ErrFailedToCreateWallet = "failed to create wallet"
-	ErrFailedToGetToken     = "failed to get token"
-	ErrFailedToParseToken   = "failed to parse token"
-	ErrFailedToParseUser    = "failed to parse user"
+	ErrUserIDRequired               = "user id is required"
+	ErrReferenceRequired            = "reference is required"
+	ErrAmountRequired               = "amount is required"
+	ErrAmountMustBeGreaterThanZero  = "amount must be greater than zero"
+	ErrUserNotFound                 = "user not found"
+	ErrFailedToGetBalance           = "failed to get balance"
+	ErrFailedToCreateWallet         = "failed to create wallet"
+	ErrFailedToGetUserData          = "failed to get token"
+	ErrFailedToParseToken           = "failed to parse token"
+	ErrFailedToParseUser            = "failed to parse user"
+	ErrFailedToGetWalletTransaction = "failed to get wallet transaction"
+	ErrDuplicateReference           = "reference is duplicate"
+	ErrFailedToUpdateBalance        = "failed to update balance"
+	ErrFailedToInsertTransaction    = "failed to insert transaction"
 )
 
 var ValidationErrorMap = map[string]map[string]string{
@@ -35,13 +42,19 @@ func NewAppError(statusCode int, message string) *AppError {
 }
 
 var (
-	ErrorUnauthorized         = NewAppError(http.StatusUnauthorized, ErrUnauthorized)
-	ErrorBadRequest           = NewAppError(http.StatusBadRequest, ErrBadRequest)
-	ErrorUserIDRequired       = NewAppError(http.StatusBadRequest, ErrUserIDRequired)
-	ErrorUserNotFound         = NewAppError(http.StatusNotFound, ErrUserNotFound)
-	ErrorFailedToGetBalance   = NewAppError(http.StatusInternalServerError, ErrFailedToGetBalance)
-	ErrorFailedToCreateWallet = NewAppError(http.StatusInternalServerError, ErrFailedToCreateWallet)
-	ErrorFailedToGetToken     = NewAppError(http.StatusUnauthorized, ErrFailedToGetToken)
-	ErrorFailedToParseToken   = NewAppError(http.StatusUnauthorized, ErrFailedToParseToken)
-	ErrorFailedToParseUser    = NewAppError(http.StatusInternalServerError, ErrFailedToParseUser)
+	ErrorUnauthorized                 = NewAppError(http.StatusUnauthorized, ErrUnauthorized)
+	ErrorBadRequest                   = NewAppError(http.StatusBadRequest, ErrBadRequest)
+	ErrorUserIDRequired               = NewAppError(http.StatusBadRequest, ErrUserIDRequired)
+	ErrorAmountRequired               = NewAppError(http.StatusBadRequest, ErrAmountRequired)
+	ErrorAmountMustBeGreaterThanZero  = NewAppError(http.StatusBadRequest, ErrAmountMustBeGreaterThanZero)
+	ErrorUserNotFound                 = NewAppError(http.StatusNotFound, ErrUserNotFound)
+	ErrorFailedToGetBalance           = NewAppError(http.StatusInternalServerError, ErrFailedToGetBalance)
+	ErrorFailedToCreateWallet         = NewAppError(http.StatusInternalServerError, ErrFailedToCreateWallet)
+	ErrorFailedToGetUserData          = NewAppError(http.StatusUnauthorized, ErrFailedToGetUserData)
+	ErrorFailedToParseToken           = NewAppError(http.StatusUnauthorized, ErrFailedToParseToken)
+	ErrorFailedToParseUser            = NewAppError(http.StatusInternalServerError, ErrFailedToParseUser)
+	ErrorFailedToGetWalletTransaction = NewAppError(http.StatusNotFound, ErrFailedToGetWalletTransaction)
+	ErrorDuplicateReference           = NewAppError(http.StatusConflict, ErrDuplicateReference)
+	ErrorFailedToUpdateBalance        = NewAppError(http.StatusInternalServerError, ErrFailedToUpdateBalance)
+	ErrorFailedToInsertTransaction    = NewAppError(http.StatusInternalServerError, ErrFailedToInsertTransaction)
 )

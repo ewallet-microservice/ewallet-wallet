@@ -18,7 +18,7 @@ func NewTransactor(db *gorm.DB) *transactor {
 }
 
 func (t *transactor) WithinTransaction(ctx context.Context, txFunc func(context.Context) error) error {
-	tx := t.db.WithContext(ctx).Begin(nil)
+	tx := t.db.WithContext(ctx).Begin()
 	if tx.Error != nil {
 		return fmt.Errorf("failed to begin transaction: %w", tx.Error)
 	}

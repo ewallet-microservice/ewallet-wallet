@@ -6,6 +6,7 @@ import (
 
 	"github.com/mhasnanr/ewallet-wallet/constants"
 	"github.com/mhasnanr/ewallet-wallet/internal/models"
+	"github.com/mhasnanr/ewallet-wallet/internal/transactor"
 	"gorm.io/gorm"
 )
 
@@ -38,4 +39,54 @@ func (r *WalletRepository) GetWalletByUserID(ctx context.Context, userID int) (m
 	}
 
 	return wallet, nil
+}
+
+func (r *WalletRepository) GetWalletTransactionByReference(ctx context.Context, reference string) (models.WalletTransaction, error) {
+	var transaction models.WalletTransaction
+
+	err := r.db.Where("reference = ?", reference).First(&transaction).Error
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
+}
+
+func (r *WalletRepository) GetWalletForLock(ctx context.Context, userID int) (models.Wallet, error) {
+	var wallet models.Wallet
+
+	err := r.getExecutor(ctx).Raw("SELECT id, user_id, balance FROM wallets WHERE user_id = ? FOR UPDATE", userID).Scan(&wallet).Error
+	if err != nil {
+		return wallet, err
+	}
+
+	return wallet, nil
+}
+
+func (r *WalletRepository) UpdateBalance(ctx context.Context, userID int, amount float64) (models.Wallet, error) {
+	var wallet models.Wallet
+
+	err := r.getExecutor(ctx).Exec("UPDATE wallets SET balance = balance + ? WHERE user_id = ?", amount, userID).Error
+	if err != nil {
+		return wallet, err
+	}
+
+	return wallet, nil
+}
+
+func (r *WalletRepository) CreateWalletTransaction(ctx context.Context, walletTransaction *models.WalletTransaction) error {
+	err := r.getExecutor(ctx).Create(walletTransaction).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *WalletRepository) getExecutor(ctx context.Context) *gorm.DB {
+	tx, ok := ctx.Value(transactor.TxKey{}).(*gorm.DB)
+	if ok && tx != nil {
+		return tx
+	}
+	return r.db.WithContext(ctx)
 }
