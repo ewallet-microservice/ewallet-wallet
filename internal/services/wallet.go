@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	pb "github.com/mhasnanr/ewallet-wallet/cmd/tokenvalidation"
 	"github.com/mhasnanr/ewallet-wallet/constants"
 	"github.com/mhasnanr/ewallet-wallet/internal/models"
 	"gorm.io/gorm"
@@ -19,10 +18,6 @@ type WalletRepository interface {
 	GetWalletForLock(ctx context.Context, userID int) (models.Wallet, error)
 }
 
-type UserServiceGRPC interface {
-	ValidateToken(ctx context.Context, accessToken string) (*pb.TokenResponse, error)
-}
-
 type TxManager interface {
 	WithinTransaction(ctx context.Context, txFunc func(context.Context) error) error
 }
@@ -32,7 +27,7 @@ type WalletService struct {
 	txManager TxManager
 }
 
-func NeWalletService(repo WalletRepository, txManager TxManager) *WalletService {
+func NewWalletService(repo WalletRepository, txManager TxManager) *WalletService {
 	return &WalletService{repo, txManager}
 }
 

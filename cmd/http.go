@@ -17,7 +17,9 @@ import (
 )
 
 func ServeHTTP(db *gorm.DB) {
-	r := gin.Default()
+	r := gin.New()
+
+	r.Use(middleware.LoggerMiddleware(bootstrap.Log))
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "server is healthy"})
@@ -33,7 +35,7 @@ func ServeHTTP(db *gorm.DB) {
 	authMiddleware := middleware.NewAuthMiddleware(userGRPCClient)
 	txManager := transactor.NewTransactor(db)
 	walletRepository := repository.NewWalletRepository(db)
-	walletService := services.NeWalletService(walletRepository, txManager)
+	walletService := services.NewWalletService(walletRepository, txManager)
 	walletHandler := handler.NewWalletHandler(walletService, authMiddleware)
 
 	walletHandler.RegisterRoute(r)

@@ -18,6 +18,6 @@ func main() {
 
 	bootstrap.SetupDatabase()
 
-	go cmd.ServeGRPC()
+	go cmd.ServeGRPC(bootstrap.DB)
 	cmd.ServeHTTP(bootstrap.DB)
 }
