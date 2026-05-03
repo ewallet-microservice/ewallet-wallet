@@ -13,7 +13,7 @@ type WalletRepository interface {
 	CreateWallet(ctx context.Context, wallet *models.Wallet) error
 	GetWalletByUserID(ctx context.Context, userID int) (models.Wallet, error)
 	GetWalletTransactionByReference(ctx context.Context, reference string) (models.WalletTransaction, error)
-	UpdateBalance(ctx context.Context, userID int, amount float64) (models.Wallet, error)
+	UpdateBalance(ctx context.Context, userID int, amount int64) (models.Wallet, error)
 	CreateWalletTransaction(ctx context.Context, walletTransaction *models.WalletTransaction) error
 	GetWalletForLock(ctx context.Context, userID int) (models.Wallet, error)
 }
@@ -145,7 +145,7 @@ func (s *WalletService) DebitBalance(ctx context.Context, userID int, req models
 		return response, constants.ErrorFailedToInsertTransaction
 	}
 
-	response.Balance = wallet.Balance + req.Amount
+	response.Balance = wallet.Balance - req.Amount
 
 	return response, nil
 }
