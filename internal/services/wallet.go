@@ -13,7 +13,7 @@ type WalletRepository interface {
 	CreateWallet(ctx context.Context, wallet *models.Wallet) error
 	GetWalletByUserID(ctx context.Context, userID int) (models.Wallet, error)
 	GetWalletTransactionByReference(ctx context.Context, reference string) (models.WalletTransaction, error)
-	UpdateBalance(ctx context.Context, userID int, amount int64) (models.Wallet, error)
+	UpdateBalance(ctx context.Context, userID int, amount int64) error
 	CreateWalletTransaction(ctx context.Context, walletTransaction *models.WalletTransaction) error
 	GetWalletForLock(ctx context.Context, userID int) (models.Wallet, error)
 }
@@ -70,31 +70,31 @@ func (s *WalletService) CreditBalance(ctx context.Context, userID int, req model
 			return err
 		}
 
-		wallet, err = s.repo.UpdateBalance(ctx, userID, req.Amount)
+		err = s.repo.UpdateBalance(ctx, userID, req.Amount)
 		if err != nil {
 			return err
 		}
+
+		walletTransaction := &models.WalletTransaction{
+			WalletID:        wallet.ID,
+			Amount:          req.Amount,
+			Reference:       req.Reference,
+			TransactionType: constants.CreditTransaction,
+		}
+
+		err = s.repo.CreateWalletTransaction(ctx, walletTransaction)
+		if err != nil {
+			return constants.ErrorFailedToInsertTransaction
+		}
+
+		response.Balance = wallet.Balance + req.Amount
 
 		return nil
 	})
 
 	if err != nil {
-		return response, constants.ErrorFailedToUpdateBalance
+		return response, err
 	}
-
-	walletTransaction := &models.WalletTransaction{
-		WalletID:        wallet.ID,
-		Amount:          req.Amount,
-		Reference:       req.Reference,
-		TransactionType: constants.CreditTransaction,
-	}
-
-	err = s.repo.CreateWalletTransaction(ctx, walletTransaction)
-	if err != nil {
-		return response, constants.ErrorFailedToInsertTransaction
-	}
-
-	response.Balance = wallet.Balance + req.Amount
 
 	return response, nil
 }
@@ -121,31 +121,31 @@ func (s *WalletService) DebitBalance(ctx context.Context, userID int, req models
 			return err
 		}
 
-		wallet, err = s.repo.UpdateBalance(ctx, userID, -req.Amount)
+		err = s.repo.UpdateBalance(ctx, userID, -req.Amount)
 		if err != nil {
 			return err
 		}
+
+		walletTransaction := &models.WalletTransaction{
+			WalletID:        wallet.ID,
+			Amount:          req.Amount,
+			Reference:       req.Reference,
+			TransactionType: constants.DebitTransaction,
+		}
+
+		err = s.repo.CreateWalletTransaction(ctx, walletTransaction)
+		if err != nil {
+			return constants.ErrorFailedToInsertTransaction
+		}
+
+		response.Balance = wallet.Balance - req.Amount
 
 		return nil
 	})
 
 	if err != nil {
-		return response, constants.ErrorFailedToUpdateBalance
+		return response, err
 	}
-
-	walletTransaction := &models.WalletTransaction{
-		WalletID:        wallet.ID,
-		Amount:          req.Amount,
-		Reference:       req.Reference,
-		TransactionType: constants.DebitTransaction,
-	}
-
-	err = s.repo.CreateWalletTransaction(ctx, walletTransaction)
-	if err != nil {
-		return response, constants.ErrorFailedToInsertTransaction
-	}
-
-	response.Balance = wallet.Balance - req.Amount
 
 	return response, nil
 }

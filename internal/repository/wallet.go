@@ -63,15 +63,13 @@ func (r *WalletRepository) GetWalletForLock(ctx context.Context, userID int) (mo
 	return wallet, nil
 }
 
-func (r *WalletRepository) UpdateBalance(ctx context.Context, userID int, amount int64) (models.Wallet, error) {
-	var wallet models.Wallet
-
+func (r *WalletRepository) UpdateBalance(ctx context.Context, userID int, amount int64) error {
 	err := r.getExecutor(ctx).Exec("UPDATE wallets SET balance = balance + ? WHERE user_id = ?", amount, userID).Error
 	if err != nil {
-		return wallet, err
+		return err
 	}
 
-	return wallet, nil
+	return nil
 }
 
 func (r *WalletRepository) CreateWalletTransaction(ctx context.Context, walletTransaction *models.WalletTransaction) error {
