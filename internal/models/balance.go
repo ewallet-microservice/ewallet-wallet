@@ -1,5 +1,5 @@
 package models
 
 type BalanceResponse struct {
-	Balance float64 `json:"balance"`
+	Balance int64 `json:"balance"`
 }

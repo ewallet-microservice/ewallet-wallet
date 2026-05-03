@@ -63,7 +63,7 @@ func (r *WalletRepository) GetWalletForLock(ctx context.Context, userID int) (mo
 	return wallet, nil
 }
 
-func (r *WalletRepository) UpdateBalance(ctx context.Context, userID int, amount float64) (models.Wallet, error) {
+func (r *WalletRepository) UpdateBalance(ctx context.Context, userID int, amount int64) (models.Wallet, error) {
 	var wallet models.Wallet
 
 	err := r.getExecutor(ctx).Exec("UPDATE wallets SET balance = balance + ? WHERE user_id = ?", amount, userID).Error

@@ -15,7 +15,7 @@ var (
 	ErrUserNotFound                 = "user not found"
 	ErrFailedToGetBalance           = "failed to get balance"
 	ErrFailedToCreateWallet         = "failed to create wallet"
-	ErrFailedToGetUserData          = "failed to get token"
+	ErrFailedToGetUserData          = "failed to get user data"
 	ErrFailedToParseToken           = "failed to parse token"
 	ErrFailedToParseUser            = "failed to parse user"
 	ErrFailedToGetWalletTransaction = "failed to get wallet transaction"

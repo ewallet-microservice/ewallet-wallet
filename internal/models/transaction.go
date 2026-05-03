@@ -9,7 +9,7 @@ import (
 type WalletTransaction struct {
 	ID              int       `json:"id" gorm:"primaryKey"`
 	WalletID        int       `json:"wallet_id" gorm:"column:wallet_id"`
-	Amount          float64   `json:"amount" gorm:"column:amount;type:decimal(15, 2)"`
+	Amount          int64     `json:"amount" gorm:"column:amount;type:bigint"`
 	Reference       string    `json:"reference" gorm:"column:reference;unique"`
 	TransactionType string    `json:"transaction_type" gorm:"column:transaction_type"`
 	CreatedAt       time.Time `json:"-"`
@@ -21,8 +21,8 @@ func (*WalletTransaction) TableName() string {
 }
 
 type TransactionRequest struct {
-	Reference string  `json:"reference" gorm:"column:reference;unique" validate:"required"`
-	Amount    float64 `json:"amount" gorm:"column:amount;type:decimal(15, 2)" validate:"required,gt=0"`
+	Reference string `json:"reference" gorm:"column:reference;unique" validate:"required"`
+	Amount    int64  `json:"amount" gorm:"column:amount;type:bigint" validate:"required,gt=0"`
 }
 
 func (f *TransactionRequest) Validate() error {
