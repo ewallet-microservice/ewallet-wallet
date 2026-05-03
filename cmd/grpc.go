@@ -7,6 +7,7 @@ import (
 
 	"github.com/mhasnanr/ewallet-wallet/bootstrap"
 	"github.com/mhasnanr/ewallet-wallet/cmd/wallet"
+	"github.com/mhasnanr/ewallet-wallet/cmd/walletTransaction"
 	handler "github.com/mhasnanr/ewallet-wallet/internal/handler/grpc"
 	"github.com/mhasnanr/ewallet-wallet/internal/repository"
 	"github.com/mhasnanr/ewallet-wallet/internal/services"
@@ -28,8 +29,10 @@ func ServeGRPC(db *gorm.DB) {
 	walletRepository := repository.NewWalletRepository(db)
 	walletService := services.NewWalletService(walletRepository, txManager)
 	walletSystem := handler.NewWalletSystem(walletService)
+	walletTxSystem := handler.NewWalletTransactionSystem(walletService)
 
 	wallet.RegisterWalletServer(server, walletSystem)
+	walletTransaction.RegisterWalletTransactionServer(server, walletTxSystem)
 
 	reflection.Register(server)
 
