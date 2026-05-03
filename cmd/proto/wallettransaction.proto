@@ -1,0 +1,28 @@
+// protoc --go_out=. --go-grpc_out=. cmd/proto/wallettransaction.proto
+
+syntax = "proto3";
+
+package walletTransaction;
+
+option go_package = "cmd/walletTransaction";
+
+service WalletTransaction {
+    rpc CreditBalance(WalletRequest) returns (WalletResponse);
+    rpc DebitBalance(WalletRequest) returns (WalletResponse);
+}
+
+message WalletRequest {
+    int64 userID = 1;
+    int64 amount = 2;
+    string reference = 3;
+}
+
+message WalletResponse {
+    string message = 1;
+    WalletData data = 2;
+}
+
+message WalletData {
+    int64 balance = 1;
+}
+
