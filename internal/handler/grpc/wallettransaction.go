@@ -25,7 +25,7 @@ func NewWalletTransactionSystem(walletSvc WalletTransactionService) *WalletTrans
 }
 
 func (e *WalletTransactionSystem) DebitBalance(ctx context.Context, request *pb.WalletRequest) (*pb.WalletResponse, error) {
-	userID := request.GetUserID()
+	userID := request.GetUserId()
 	if userID == 0 {
 		return nil, status.Error(codes.InvalidArgument, "user id is required")
 	}
@@ -34,7 +34,7 @@ func (e *WalletTransactionSystem) DebitBalance(ctx context.Context, request *pb.
 		Reference: request.GetReference(),
 		Amount:    request.GetAmount(),
 	}
-	wallet, err := e.svc.DebitBalance(ctx, int(request.GetUserID()), walletRequest)
+	wallet, err := e.svc.DebitBalance(ctx, int(request.GetUserId()), walletRequest)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "internal server error: %v", err)
 	}
@@ -48,7 +48,7 @@ func (e *WalletTransactionSystem) DebitBalance(ctx context.Context, request *pb.
 }
 
 func (e *WalletTransactionSystem) CreditBalance(ctx context.Context, request *pb.WalletRequest) (*pb.WalletResponse, error) {
-	userID := request.GetUserID()
+	userID := request.GetUserId()
 	if userID == 0 {
 		return nil, status.Error(codes.InvalidArgument, "user id is required")
 	}
@@ -57,7 +57,7 @@ func (e *WalletTransactionSystem) CreditBalance(ctx context.Context, request *pb
 		Reference: request.GetReference(),
 		Amount:    request.GetAmount(),
 	}
-	wallet, err := e.svc.CreditBalance(ctx, int(request.GetUserID()), walletRequest)
+	wallet, err := e.svc.CreditBalance(ctx, int(request.GetUserId()), walletRequest)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "internal server error: %v", err)
 	}

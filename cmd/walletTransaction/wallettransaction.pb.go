@@ -25,7 +25,7 @@ const (
 
 type WalletRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserID        int64                  `protobuf:"varint,1,opt,name=userID,proto3" json:"userID,omitempty"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Amount        int64                  `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
 	Reference     string                 `protobuf:"bytes,3,opt,name=reference,proto3" json:"reference,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -62,9 +62,9 @@ func (*WalletRequest) Descriptor() ([]byte, []int) {
 	return file_cmd_proto_wallettransaction_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *WalletRequest) GetUserID() int64 {
+func (x *WalletRequest) GetUserId() int64 {
 	if x != nil {
-		return x.UserID
+		return x.UserId
 	}
 	return 0
 }
@@ -183,9 +183,9 @@ var File_cmd_proto_wallettransaction_proto protoreflect.FileDescriptor
 
 const file_cmd_proto_wallettransaction_proto_rawDesc = "" +
 	"\n" +
-	"!cmd/proto/wallettransaction.proto\x12\x11walletTransaction\"]\n" +
-	"\rWalletRequest\x12\x16\n" +
-	"\x06userID\x18\x01 \x01(\x03R\x06userID\x12\x16\n" +
+	"!cmd/proto/wallettransaction.proto\x12\x11walletTransaction\"^\n" +
+	"\rWalletRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x16\n" +
 	"\x06amount\x18\x02 \x01(\x03R\x06amount\x12\x1c\n" +
 	"\treference\x18\x03 \x01(\tR\treference\"]\n" +
 	"\x0eWalletResponse\x12\x18\n" +

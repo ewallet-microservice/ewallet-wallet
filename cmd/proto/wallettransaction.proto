@@ -12,7 +12,7 @@ service WalletTransaction {
 }
 
 message WalletRequest {
-    int64 userID = 1;
+    int64 user_id = 1;
     int64 amount = 2;
     string reference = 3;
 }
