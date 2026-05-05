@@ -5,6 +5,7 @@ import (
 
 	pb "github.com/mhasnanr/ewallet-wallet/cmd/wallet"
 	"github.com/mhasnanr/ewallet-wallet/constants"
+	"github.com/mhasnanr/ewallet-wallet/internal/helpers"
 	"github.com/mhasnanr/ewallet-wallet/internal/models"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -35,7 +36,7 @@ func (h *WalletSystem) CreateWallet(ctx context.Context, request *pb.CreateWalle
 
 	err := h.svc.CreateWallet(ctx, wallet)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "internal server error: %v", err)
+		return nil, helpers.MapAppErrorToGRPC(err)
 	}
 
 	return &pb.CreateWalletResponse{

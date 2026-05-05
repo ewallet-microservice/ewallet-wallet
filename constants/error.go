@@ -25,7 +25,13 @@ var (
 )
 
 var ValidationErrorMap = map[string]map[string]string{
-	"required": {},
+	"required": {
+		"TransactionRequest.Reference": ErrReferenceRequired,
+		"TransactionRequest.Amount":    ErrAmountRequired,
+	},
+	"gt": {
+		"TransactionRequest.Amount": ErrAmountMustBeGreaterThanZero,
+	},
 }
 
 type AppError struct {
@@ -53,7 +59,7 @@ var (
 	ErrorFailedToGetUserData          = NewAppError(http.StatusUnauthorized, ErrFailedToGetUserData)
 	ErrorFailedToParseToken           = NewAppError(http.StatusUnauthorized, ErrFailedToParseToken)
 	ErrorFailedToParseUser            = NewAppError(http.StatusInternalServerError, ErrFailedToParseUser)
-	ErrorFailedToGetWalletTransaction = NewAppError(http.StatusNotFound, ErrFailedToGetWalletTransaction)
+	ErrorFailedToGetWalletTransaction = NewAppError(http.StatusInternalServerError, ErrFailedToGetWalletTransaction)
 	ErrorDuplicateReference           = NewAppError(http.StatusConflict, ErrDuplicateReference)
 	ErrorFailedToUpdateBalance        = NewAppError(http.StatusInternalServerError, ErrFailedToUpdateBalance)
 	ErrorFailedToInsertTransaction    = NewAppError(http.StatusInternalServerError, ErrFailedToInsertTransaction)
