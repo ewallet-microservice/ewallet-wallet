@@ -41,6 +41,9 @@ func ServeHTTP(db *gorm.DB) {
 	walletService := services.NewWalletService(walletRepository, txManager)
 	walletHandler := handler.NewWalletHandler(walletService, authMiddleware)
 
+	healthCheckHandler := handler.NewHealthCheck()
+
+	healthCheckHandler.RegisterRoute(r)
 	walletHandler.RegisterRoute(r)
 
 	httpPort := bootstrap.GetEnv("HTTP_PORT", "8081")
