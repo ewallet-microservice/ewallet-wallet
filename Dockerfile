@@ -14,5 +14,6 @@ FROM alpine:3.22.2
 WORKDIR /root
 
 COPY --from=builder /app/ewallet-wallet  .
+COPY --from=builder /app/.env ./.env
 
 CMD ["./ewallet-wallet"]
